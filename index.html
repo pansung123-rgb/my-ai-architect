@@ -65,7 +65,10 @@
 <body>
   <div id="root"></div>
 
-  <script type="text/babel" data-type="module">
+  <script type="text/babel">
+    /** @jsx React.createElement */
+    /** @jsxFrag React.Fragment */
+    
     function generateId() {
       return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
     }
