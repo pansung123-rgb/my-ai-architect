@@ -5,313 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>AI App Architect</title>
   
-  <!-- React + ReactDOM CDN (Core UI) -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   
-  <!-- Babel Standalone สำหรับแปลง JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
-  <!-- ฟอนต์ Kanit -->
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
   
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Kanit', sans-serif;
-    }
-    body {
-      background-color: #EFF6FF;
-      padding: 16px;
-      min-height: 100vh;
-    }
-    .container {
-      max-width: 600px;
-      margin: 0 auto;
-      position: relative;
-      padding-bottom: 80px;
-    }
-    .app-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .app-title {
-      color: #1E3A8A;
-      font-weight: 500;
-      font-size: 24px;
-    }
-    .action-bar {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-    .btn-action {
-      background: white;
-      border: 1px solid #CBD5E1;
-      color: #475569;
-      border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s;
-    }
-    .btn-action:hover {
-      background: #F8FAFC;
-      border-color: #94A3B8;
-      color: #1E293B;
-    }
-    .fab {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: #3B82F6;
-      color: white;
-      border: none;
-      border-radius: 50px;
-      padding: 14px 24px;
-      font-size: 16px;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(59,130,246,0.4);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      z-index: 1000;
-    }
-    .fab:hover {
-      background: #2563EB;
-    }
-    .fab-delete {
-      position: fixed;
-      bottom: 20px;
-      left: 20px;
-      background: #EF4444;
-      color: white;
-      border: none;
-      border-radius: 50px;
-      padding: 14px 24px;
-      font-size: 14px;
-      font-weight: 500;
-      box-shadow: 0 4px 12px rgba(239,68,68,0.4);
-      cursor: pointer;
-      z-index: 1000;
-    }
-    .fab-delete:hover {
-      background: #DC2626;
-    }
-    .module-card {
-      background: white;
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }
-    .module-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-    }
-    .module-title {
-      font-size: 18px;
-      font-weight: 500;
-      color: #1E3A8A;
-    }
-    .module-subtitle {
-      font-size: 13px;
-      color: #64748B;
-      margin-top: 2px;
-    }
-    .expand-icon {
-      font-size: 20px;
-      color: #64748B;
-      transition: transform 0.2s;
-    }
-    .subfeature-list {
-      margin-top: 12px;
-    }
-    .subfeature-card {
-      background: #E8F0FE;
-      border-radius: 12px;
-      padding: 12px;
-      margin: 8px 0;
-    }
-    .subfeature-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      cursor: pointer;
-    }
-    .subfeature-name {
-      font-weight: 500;
-      color: #1E3A8A;
-    }
-    .detail-box {
-      margin-top: 10px;
-      padding: 10px;
-      background: rgba(255,255,255,0.6);
-      border-radius: 8px;
-    }
-    .detail-row {
-      display: flex;
-      margin-bottom: 6px;
-      font-size: 13px;
-    }
-    .detail-label {
-      font-weight: 500;
-      width: 80px;
-      color: #334155;
-    }
-    .detail-value {
-      color: #1E293B;
-      flex: 1;
-    }
-    .chip {
-      display: inline-block;
-      background: #DBEAFE;
-      color: #1E40AF;
-      border-radius: 20px;
-      padding: 2px 12px;
-      margin-right: 4px;
-      margin-bottom: 4px;
-      font-size: 12px;
-    }
-    .btn-small {
-      background: transparent;
-      border: 1px solid #3B82F6;
-      color: #3B82F6;
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 13px;
-      cursor: pointer;
-      margin-top: 6px;
-    }
-    .btn-delete {
-      background: transparent;
-      border: 1px solid #EF4444;
-      color: #EF4444;
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: 12px;
-      cursor: pointer;
-      margin-top: 6px;
-      margin-left: 6px;
-    }
-    .add-sub-btn {
-      margin-top: 10px;
-      display: flex;
-      justify-content: flex-start;
-    }
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.4);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
-    .modal-content {
-      background: white;
-      border-radius: 16px;
-      padding: 24px;
-      width: 90%;
-      max-width: 400px;
-      max-height: 80vh;
-      overflow-y: auto;
-      position: relative;
-    }
-    .modal-title {
-      font-size: 20px;
-      font-weight: 500;
-      margin-bottom: 16px;
-      color: #1E3A8A;
-    }
-    input, textarea, select {
-      width: 100%;
-      padding: 8px 12px;
-      margin: 8px 0;
-      border: 1px solid #CBD5E1;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    .btn-primary {
-      background: #3B82F6;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 10px 20px;
-      font-weight: 500;
-      cursor: pointer;
-      margin-top: 12px;
-      width: 100%;
-    }
-    .btn-close {
-      background: transparent;
-      border: none;
-      font-size: 24px;
-      position: absolute;
-      top: 10px;
-      right: 16px;
-      cursor: pointer;
-    }
-    .empty-state {
-      text-align: center;
-      color: #64748B;
-      margin-top: 60px;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
+    body { background-color: #EFF6FF; padding: 16px; min-height: 100vh; }
+    .container { max-width: 600px; margin: 0 auto; position: relative; padding-bottom: 80px; }
+    .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .app-title { color: #1E3A8A; font-weight: 500; font-size: 24px; }
+    .action-bar { display: flex; gap: 8px; margin-bottom: 16px; }
+    .btn-action { background: white; border: 1px solid #CBD5E1; color: #475569; border-radius: 8px; padding: 8px 12px; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
+    .btn-action:hover { background: #F8FAFC; border-color: #94A3B8; color: #1E293B; }
+    .fab { position: fixed; bottom: 20px; right: 20px; background: #3B82F6; color: white; border: none; border-radius: 50px; padding: 14px 24px; font-size: 16px; font-weight: 500; box-shadow: 0 4px 12px rgba(59,130,246,0.4); cursor: pointer; display: flex; align-items: center; gap: 6px; z-index: 1000; }
+    .fab:hover { background: #2563EB; }
+    .fab-delete { position: fixed; bottom: 20px; left: 20px; background: #EF4444; color: white; border: none; border-radius: 50px; padding: 14px 24px; font-size: 14px; font-weight: 500; box-shadow: 0 4px 12px rgba(239,68,68,0.4); cursor: pointer; z-index: 1000; }
+    .fab-delete:hover { background: #DC2626; }
+    .module-card { background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    .module-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .module-title { font-size: 18px; font-weight: 500; color: #1E3A8A; }
+    .module-subtitle { font-size: 13px; color: #64748B; margin-top: 2px; }
+    .expand-icon { font-size: 20px; color: #64748B; transition: transform 0.2s; }
+    .subfeature-list { margin-top: 12px; }
+    .subfeature-card { background: #E8F0FE; border-radius: 12px; padding: 12px; margin: 8px 0; }
+    .subfeature-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+    .subfeature-name { font-weight: 500; color: #1E3A8A; }
+    .detail-box { margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.6); border-radius: 8px; }
+    .detail-row { display: flex; margin-bottom: 6px; font-size: 13px; }
+    .detail-label { font-weight: 500; width: 80px; color: #334155; }
+    .detail-value { color: #1E293B; flex: 1; }
+    .chip { display: inline-block; background: #DBEAFE; color: #1E40AF; border-radius: 20px; padding: 2px 12px; margin-right: 4px; margin-bottom: 4px; font-size: 12px; }
+    .btn-small { background: transparent; border: 1px solid #3B82F6; color: #3B82F6; border-radius: 20px; padding: 4px 12px; font-size: 13px; cursor: pointer; margin-top: 6px; }
+    .btn-delete { background: transparent; border: 1px solid #EF4444; color: #EF4444; border-radius: 20px; padding: 4px 12px; font-size: 12px; cursor: pointer; margin-top: 6px; margin-left: 6px; }
+    .add-sub-btn { margin-top: 10px; display: flex; justify-content: flex-start; }
+    .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 2000; }
+    .modal-content { background: white; border-radius: 16px; padding: 24px; width: 90%; max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative; }
+    .modal-title { font-size: 20px; font-weight: 500; margin-bottom: 16px; color: #1E3A8A; }
+    input, textarea, select { width: 100%; padding: 8px 12px; margin: 8px 0; border: 1px solid #CBD5E1; border-radius: 8px; font-size: 14px; }
+    .btn-primary { background: #3B82F6; color: white; border: none; border-radius: 8px; padding: 10px 20px; font-weight: 500; cursor: pointer; margin-top: 12px; width: 100%; }
+    .btn-close { background: transparent; border: none; font-size: 24px; position: absolute; top: 10px; right: 16px; cursor: pointer; }
+    .empty-state { text-align: center; color: #64748B; margin-top: 60px; }
     .guardrail-ok { color: #10B981; }
     .guardrail-warning { color: #F59E0B; }
     .guardrail-error { color: #EF4444; }
-    .priority-badge {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: 11px;
-      font-weight: 500;
-      margin-left: 8px;
-    }
+    .priority-badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 500; margin-left: 8px; }
     .priority-critical { background: #FEE2E2; color: #991B1B; }
     .priority-high { background: #FFEDD5; color: #9A3412; }
     .priority-medium { background: #DBEAFE; color: #1E40AF; }
     .priority-low { background: #F3F4F6; color: #374151; }
-    .toast {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #10B981;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      z-index: 3000;
-      animation: fadeInOut 2s ease;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .toast.error {
-      background: #EF4444;
-    }
-    @keyframes fadeInOut {
-      0% { opacity: 0; top: 0; }
-      10% { opacity: 1; top: 20px; }
-      90% { opacity: 1; top: 20px; }
-      100% { opacity: 0; top: 0; }
-    }
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10B981; color: white; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 3000; animation: fadeInOut 2s ease; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+    .toast.error { background: #EF4444; }
+    @keyframes fadeInOut { 0% { opacity: 0; top: 0; } 10% { opacity: 1; top: 20px; } 90% { opacity: 1; top: 20px; } 100% { opacity: 0; top: 0; } }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
-  <script type="text/babel">
+  <script type="text/babel" data-type="module">
     function generateId() {
       return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
     }
@@ -341,12 +95,11 @@
       // --- UI State ---
       const [expandedModules, setExpandedModules] = React.useState([]);
       const [expandedSubFeatures, setExpandedSubFeatures] = React.useState([]);
-      const [editingSub, setEditingSub] = React.useState(null); // { moduleId, subId }
+      const [editingSub, setEditingSub] = React.useState(null); 
       const [toast, setToast] = React.useState({ message: null, type: 'success' });
 
       const fileInputRef = React.useRef(null);
 
-      // Save to localStorage whenever project changes
       React.useEffect(() => {
         try {
           localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
@@ -360,18 +113,12 @@
         setTimeout(() => setToast({ message: null, type: 'success' }), 2500);
       };
 
-      // --- Actions ---
-      const handleImportProject = (newProject) => {
-        setProject(newProject);
-      };
+      const handleImportProject = (newProject) => setProject(newProject);
 
       const handleAddModule = (name, type) => {
         setProject(prev => ({
           ...prev,
-          modules: [
-            ...prev.modules,
-            { id: generateId(), name, type, status: 'draft', subFeatures: [] }
-          ]
+          modules: [...prev.modules, { id: generateId(), name, type, status: 'draft', subFeatures: [] }]
         }));
       };
 
@@ -384,17 +131,7 @@
                   ...mod,
                   subFeatures: [
                     ...mod.subFeatures,
-                    {
-                      id: generateId(),
-                      name,
-                      priority: 'medium',
-                      constraints: [],
-                      skills: [],
-                      dataSources: [],
-                      plugins: [],
-                      generalDescription: '',
-                      guardrailStatus: 'warning'
-                    }
+                    { id: generateId(), name, priority: 'medium', constraints: [], skills: [], dataSources: [], plugins: [], generalDescription: '', guardrailStatus: 'warning' }
                   ]
                 }
               : mod
@@ -405,33 +142,16 @@
       const handleUpdateSubFeature = (moduleId, subId, data) => {
         setProject(prev => ({
           ...prev,
-          modules: prev.modules.map(mod => 
-            mod.id === moduleId 
-              ? {
-                  ...mod,
-                  subFeatures: mod.subFeatures.map(sub => sub.id === subId ? { ...sub, ...data } : sub)
-                }
-              : mod
-          )
+          modules: prev.modules.map(mod => mod.id === moduleId ? { ...mod, subFeatures: mod.subFeatures.map(sub => sub.id === subId ? { ...sub, ...data } : sub) } : mod)
         }));
       };
 
       const handleDeleteModule = (moduleId) => {
-        setProject(prev => ({
-          ...prev,
-          modules: prev.modules.filter(mod => mod.id !== moduleId)
-        }));
+        setProject(prev => ({ ...prev, modules: prev.modules.filter(mod => mod.id !== moduleId) }));
       };
 
       const handleDeleteSubFeature = (moduleId, subId) => {
-        setProject(prev => ({
-          ...prev,
-          modules: prev.modules.map(mod => 
-            mod.id === moduleId 
-              ? { ...mod, subFeatures: mod.subFeatures.filter(sub => sub.id !== subId) }
-              : mod
-          )
-        }));
+        setProject(prev => ({ ...prev, modules: prev.modules.map(mod => mod.id === moduleId ? { ...mod, subFeatures: mod.subFeatures.filter(sub => sub.id !== subId) } : mod) }));
       };
 
       const handleResetProject = () => {
@@ -443,16 +163,8 @@
       };
 
       const handleExport = () => {
-        if (project.modules.length === 0) {
-          showToast('Project is empty', 'error');
-          return;
-        }
-        const exportData = {
-          appName: "AI App Architect Project",
-          exportedAt: new Date().toISOString(),
-          version: "1.0",
-          project: project
-        };
+        if (project.modules.length === 0) { showToast('Project is empty', 'error'); return; }
+        const exportData = { appName: "AI App Architect Project", exportedAt: new Date().toISOString(), version: "1.0", project: project };
         const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -486,21 +198,11 @@
         reader.readAsText(file);
       };
 
-      // --- UI Toggles ---
-      const toggleModuleExpand = (id) => {
-        setExpandedModules(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
-      };
+      const toggleModuleExpand = (id) => setExpandedModules(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
+      const toggleSubExpand = (id) => setExpandedSubFeatures(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
 
-      const toggleSubExpand = (id) => {
-        setExpandedSubFeatures(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
-      };
-
-      // ---------- Local Modal Component Inside App ----------
       const EditModal = () => {
-        const sub = editingSub
-          ? project.modules.find(m => m.id === editingSub.moduleId)?.subFeatures.find(s => s.id === editingSub.subId)
-          : null;
-
+        const sub = editingSub ? project.modules.find(m => m.id === editingSub.moduleId)?.subFeatures.find(s => s.id === editingSub.subId) : null;
         const [priority, setPriority] = React.useState('medium');
         const [constraintsStr, setConstraintsStr] = React.useState('');
         const [skills, setSkills] = React.useState([]);
@@ -521,13 +223,7 @@
 
         const handleSave = () => {
           const constraintsArray = constraintsStr.split(',').map(s => s.trim()).filter(Boolean);
-          handleUpdateSubFeature(editingSub.moduleId, editingSub.subId, {
-            priority,
-            constraints: constraintsArray,
-            skills,
-            plugins,
-            guardrailStatus: (priority === 'critical' && constraintsArray.length === 0) ? 'error' : 'ok',
-          });
+          handleUpdateSubFeature(editingSub.moduleId, editingSub.subId, { priority, constraints: constraintsArray, skills, plugins, guardrailStatus: (priority === 'critical' && constraintsArray.length === 0) ? 'error' : 'ok' });
           showToast('Sub-feature updated');
           setEditingSub(null);
         };
@@ -537,40 +233,18 @@
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <span className="btn-close" onClick={() => setEditingSub(null)}>&times;</span>
               <div className="modal-title">Edit {sub.name}</div>
-              
               <label>Priority</label>
               <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="critical">Critical</option>
+                <option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option><option value="critical">Critical</option>
               </select>
-
               <label>Constraints (comma separated)</label>
               <input type="text" value={constraintsStr} onChange={(e) => setConstraintsStr(e.target.value)} />
-
               <label>Skills</label>
-              <div>
-                {skills.map(s => (
-                  <span key={s} className="chip" style={{ cursor: 'pointer' }} onClick={() => setSkills(skills.filter(i => i !== s))}>{s} ✕</span>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input type="text" placeholder="Add skill" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (newSkill.trim() && !skills.includes(newSkill.trim()) && (setSkills([...skills, newSkill.trim()]), setNewSkill('')))} style={{ flex: 1 }} />
-                <button className="btn-small" onClick={() => newSkill.trim() && !skills.includes(newSkill.trim()) && (setSkills([...skills, newSkill.trim()]), setNewSkill(''))}>Add</button>
-              </div>
-
+              <div>{skills.map(s => (<span key={s} className="chip" style={{ cursor: 'pointer' }} onClick={() => setSkills(skills.filter(i => i !== s))}>{s} ✕</span>))}</div>
+              <div style={{ display: 'flex', gap: '8px' }}><input type="text" placeholder="Add skill" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (newSkill.trim() && !skills.includes(newSkill.trim()) && (setSkills([...skills, newSkill.trim()]), setNewSkill('')))} style={{ flex: 1 }} /><button className="btn-small" onClick={() => newSkill.trim() && !skills.includes(newSkill.trim()) && (setSkills([...skills, newSkill.trim()]), setNewSkill(''))}>Add</button></div>
               <label style={{ marginTop: '12px' }}>Plugins</label>
-              <div>
-                {plugins.map(p => (
-                  <span key={p} className="chip" style={{ cursor: 'pointer' }} onClick={() => setPlugins(plugins.filter(i => i !== p))}>{p} ✕</span>
-                ))}
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input type="text" placeholder="Add plugin" value={newPlugin} onChange={(e) => setNewPlugin(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (newPlugin.trim() && !plugins.includes(newPlugin.trim()) && (setPlugins([...plugins, newPlugin.trim()]), setNewPlugin('')))} style={{ flex: 1 }} />
-                <button className="btn-small" onClick={() => newPlugin.trim() && !plugins.includes(newPlugin.trim()) && (setPlugins([...plugins, newPlugin.trim()]), setNewPlugin(''))}>Add</button>
-              </div>
-
+              <div>{plugins.map(p => (<span key={p} className="chip" style={{ cursor: 'pointer' }} onClick={() => setPlugins(plugins.filter(i => i !== p))}>{p} ✕</span>))}</div>
+              <div style={{ display: 'flex', gap: '8px' }}><input type="text" placeholder="Add plugin" value={newPlugin} onChange={(e) => setNewPlugin(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (newPlugin.trim() && !plugins.includes(newPlugin.trim()) && (setPlugins([...plugins, newPlugin.trim()]), setNewPlugin('')))} style={{ flex: 1 }} /><button className="btn-small" onClick={() => newPlugin.trim() && !plugins.includes(newPlugin.trim()) && (setPlugins([...plugins, newPlugin.trim()]), setNewPlugin(''))}>Add</button></div>
               <button className="btn-primary" onClick={handleSave}>Save</button>
             </div>
           </div>
@@ -580,40 +254,26 @@
       return (
         <div className="container">
           {toast.message && <div className={`toast ${toast.type === 'error' ? 'error' : ''}`}>{toast.message}</div>}
-          
-          <div className="app-header">
-            <h2 className="app-title">🧠 AI App Architect</h2>
-          </div>
-
+          <div className="app-header"><h2 className="app-title">🧠 AI App Architect</h2></div>
           <div className="action-bar">
             <button className="btn-action" onClick={() => fileInputRef.current.click()}>📥 Import JSON</button>
             <input type="file" accept=".json" style={{ display: 'none' }} ref={fileInputRef} onChange={handleImportFile} />
             <button className="btn-action" onClick={handleExport}>📤 Export JSON</button>
           </div>
-
           {project.modules.length === 0 && (
             <div className="empty-state">
               <p style={{ fontSize: '18px', marginBottom: '8px' }}>No modules yet</p>
               <p>Tap <strong>+ Add Core Module</strong> to start designing your app!</p>
-              <p style={{ fontSize: '14px', marginTop: '16px' }}>Or click <strong>Import JSON</strong> above to load a project.</p>
             </div>
           )}
-
           {project.modules.map(mod => {
             const isExpanded = expandedModules.includes(mod.id);
             return (
               <div key={mod.id} className="module-card">
                 <div className="module-header" onClick={() => toggleModuleExpand(mod.id)}>
-                  <div>
-                    <div className="module-title">{mod.name}</div>
-                    <div className="module-subtitle">Type: {mod.type} • Status: {mod.status} • Sub-features: {mod.subFeatures.length}</div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <button className="btn-delete" onClick={(e) => { e.stopPropagation(); if(confirm(`Delete module "${mod.name}"?`)) { handleDeleteModule(mod.id); showToast('Module deleted'); } }} style={{ marginTop: 0 }}>🗑</button>
-                    <span className="expand-icon">{isExpanded ? '▲' : '▼'}</span>
-                  </div>
+                  <div><div className="module-title">{mod.name}</div><div className="module-subtitle">Type: {mod.type} • Sub-features: {mod.subFeatures.length}</div></div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><button className="btn-delete" onClick={(e) => { e.stopPropagation(); if(confirm(`Delete module "${mod.name}"?`)) { handleDeleteModule(mod.id); showToast('Module deleted'); } }} style={{ marginTop: 0 }}>🗑</button><span className="expand-icon">{isExpanded ? '▲' : '▼'}</span></div>
                 </div>
-                
                 {isExpanded && (
                   <div className="subfeature-list">
                     {mod.subFeatures.map(sub => {
@@ -621,11 +281,7 @@
                       return (
                         <div key={sub.id} className="subfeature-card">
                           <div className="subfeature-header" onClick={() => toggleSubExpand(sub.id)}>
-                            <span>
-                              <span className="subfeature-name">{sub.name}</span>
-                              <span className={`priority-badge priority-${sub.priority}`}>{sub.priority}</span>
-                            </span>
-                            <span className="expand-icon">{isSubOpen ? '▲' : '▼'}</span>
+                            <span><span className="subfeature-name">{sub.name}</span><span className={`priority-badge priority-${sub.priority}`}>{sub.priority}</span></span><span className="expand-icon">{isSubOpen ? '▲' : '▼'}</span>
                           </div>
                           {isSubOpen && (
                             <div className="detail-box">
@@ -640,23 +296,14 @@
                         </div>
                       );
                     })}
-                    <div className="add-sub-btn">
-                      <button className="btn-small" onClick={() => handleAddSubFeature(mod.id, 'New Sub-feature')}>+ Add Sub-feature</button>
-                    </div>
+                    <div className="add-sub-btn"><button className="btn-small" onClick={() => handleAddSubFeature(mod.id, 'New Sub-feature')}>+ Add Sub-feature</button></div>
                   </div>
                 )}
               </div>
             );
           })}
-
-          <button className="fab" onClick={() => handleAddModule('New Module', 'feature')}>
-            <span style={{ fontSize: '20px' }}>+</span> Add Core Module
-          </button>
-          
-          {project.modules.length > 0 && (
-            <button className="fab-delete" onClick={handleResetProject}>🗑 Reset All</button>
-          )}
-
+          <button className="fab" onClick={() => handleAddModule('New Module', 'feature')}><span style={{ fontSize: '20px' }}>+</span> Add Core Module</button>
+          {project.modules.length > 0 && (<button className="fab-delete" onClick={handleResetProject}>🗑 Reset All</button>)}
           <EditModal />
         </div>
       );
