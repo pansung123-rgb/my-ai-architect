@@ -5,13 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>AI App Architect</title>
   
+  <!-- React + ReactDOM CDN (Core UI) -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/zustand/4.5.2/umd/index.production.js" crossorigin></script>
-  
+  <!-- Babel Standalone สำหรับแปลง JSX -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   
+  <!-- ฟอนต์ Kanit -->
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
   
   <style>
@@ -311,14 +312,13 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { create } = window.zustand || {};
-
     function generateId() {
       return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
     }
 
     const STORAGE_KEY = 'ai_app_architect_project';
-    function loadProject() {
+    
+    function loadInitialProject() {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
@@ -330,49 +330,56 @@
       } catch (e) {
         console.warn('Failed to load from localStorage:', e);
       }
-      return null;
-    }
-    
-    function saveProject(project) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
-      } catch (e) {
-        console.warn('Failed to save to localStorage:', e);
-      }
+      return { projectId: generateId(), modules: [] };
     }
 
-    // ---------- Content Store ----------
-    const useContentStore = create((set, get) => ({
-      project: loadProject() || {
-        projectId: generateId(),
-        modules: [],
-      },
-      importProject: (newProject) => set(() => {
-        saveProject(newProject);
-        return { project: newProject };
-      }),
-      addModule: (name, type) => set((state) => {
-        const newProject = {
-          ...state.project,
+    // ---------- Main App Component ----------
+    const App = () => {
+      // --- Content State ---
+      const [project, setProject] = React.useState(loadInitialProject);
+
+      // --- UI State ---
+      const [expandedModules, setExpandedModules] = React.useState([]);
+      const [expandedSubFeatures, setExpandedSubFeatures] = React.useState([]);
+      const [editingSub, setEditingSub] = React.useState(null); // { moduleId, subId }
+      const [toast, setToast] = React.useState({ message: null, type: 'success' });
+
+      const fileInputRef = React.useRef(null);
+
+      // Save to localStorage whenever project changes
+      React.useEffect(() => {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(project));
+        } catch (e) {
+          console.warn('Failed to save to localStorage:', e);
+        }
+      }, [project]);
+
+      const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast({ message: null, type: 'success' }), 2500);
+      };
+
+      // --- Actions ---
+      const handleImportProject = (newProject) => {
+        setProject(newProject);
+      };
+
+      const handleAddModule = (name, type) => {
+        setProject(prev => ({
+          ...prev,
           modules: [
-            ...state.project.modules,
-            {
-              id: generateId(),
-              name,
-              type,
-              status: 'draft',
-              subFeatures: [],
-            },
-          ],
-        };
-        saveProject(newProject);
-        return { project: newProject };
-      }),
-      addSubFeature: (moduleId, name) => set((state) => {
-        const newProject = {
-          ...state.project,
-          modules: state.project.modules.map((mod) =>
-            mod.id === moduleId
+            ...prev.modules,
+            { id: generateId(), name, type, status: 'draft', subFeatures: [] }
+          ]
+        }));
+      };
+
+      const handleAddSubFeature = (moduleId, name) => {
+        setProject(prev => ({
+          ...prev,
+          modules: prev.modules.map(mod => 
+            mod.id === moduleId 
               ? {
                   ...mod,
                   subFeatures: [
@@ -386,315 +393,51 @@
                       dataSources: [],
                       plugins: [],
                       generalDescription: '',
-                      guardrailStatus: 'warning',
-                    },
-                  ],
+                      guardrailStatus: 'warning'
+                    }
+                  ]
                 }
               : mod
-          ),
-        };
-        saveProject(newProject);
-        return { project: newProject };
-      }),
-      updateSubFeature: (moduleId, subId, data) => set((state) => {
-        const newProject = {
-          ...state.project,
-          modules: state.project.modules.map((mod) =>
-            mod.id === moduleId
+          )
+        }));
+      };
+
+      const handleUpdateSubFeature = (moduleId, subId, data) => {
+        setProject(prev => ({
+          ...prev,
+          modules: prev.modules.map(mod => 
+            mod.id === moduleId 
               ? {
                   ...mod,
-                  subFeatures: mod.subFeatures.map((sub) =>
-                    sub.id === subId ? { ...sub, ...data } : sub
-                  ),
+                  subFeatures: mod.subFeatures.map(sub => sub.id === subId ? { ...sub, ...data } : sub)
                 }
               : mod
-          ),
-        };
-        saveProject(newProject);
-        return { project: newProject };
-      }),
-      deleteModule: (moduleId) => set((state) => {
-        const newProject = {
-          ...state.project,
-          modules: state.project.modules.filter((mod) => mod.id !== moduleId),
-        };
-        saveProject(newProject);
-        return { project: newProject };
-      }),
-      deleteSubFeature: (moduleId, subId) => set((state) => {
-        const newProject = {
-          ...state.project,
-          modules: state.project.modules.map((mod) =>
-            mod.id === moduleId
-              ? {
-                  ...mod,
-                  subFeatures: mod.subFeatures.filter((sub) => sub.id !== subId),
-                }
+          )
+        }));
+      };
+
+      const handleDeleteModule = (moduleId) => {
+        setProject(prev => ({
+          ...prev,
+          modules: prev.modules.filter(mod => mod.id !== moduleId)
+        }));
+      };
+
+      const handleDeleteSubFeature = (moduleId, subId) => {
+        setProject(prev => ({
+          ...prev,
+          modules: prev.modules.map(mod => 
+            mod.id === moduleId 
+              ? { ...mod, subFeatures: mod.subFeatures.filter(sub => sub.id !== subId) }
               : mod
-          ),
-        };
-        saveProject(newProject);
-        return { project: newProject };
-      }),
-      resetProject: () => set(() => {
-        const newProject = { projectId: generateId(), modules: [] };
-        localStorage.removeItem(STORAGE_KEY);
-        return { project: newProject };
-      }),
-    }));
-
-    // ---------- UI Store ----------
-    const useUIStore = create((set) => ({
-      expandedModules: [],
-      expandedSubFeatures: [],
-      editingSub: null,
-      toastMessage: null,
-      toastType: 'success',
-      toggleModuleExpand: (id) => set((state) => ({
-        expandedModules: state.expandedModules.includes(id)
-          ? state.expandedModules.filter((mid) => mid !== id)
-          : [...state.expandedModules, id],
-      })),
-      toggleSubExpand: (id) => set((state) => ({
-        expandedSubFeatures: state.expandedSubFeatures.includes(id)
-          ? state.expandedSubFeatures.filter((sid) => sid !== id)
-          : [...state.expandedSubFeatures, id],
-      })),
-      openEditor: (moduleId, subId) => set({ editingSub: { moduleId, subId } }),
-      closeEditor: () => set({ editingSub: null }),
-      showToast: (msg, type = 'success') => {
-        set({ toastMessage: msg, toastType: type });
-        setTimeout(() => set({ toastMessage: null }), 2500);
-      },
-    }));
-
-    // ---------- Components ----------
-    const Toast = () => {
-      const { toastMessage, toastType } = useUIStore();
-      if (!toastMessage) return null;
-      return <div className={`toast ${toastType === 'error' ? 'error' : ''}`}>{toastMessage}</div>;
-    };
-
-    const SubFeatureCard = ({ moduleId, sub }) => {
-      const { expandedSubFeatures, toggleSubExpand, openEditor, showToast } = useUIStore();
-      const deleteSubFeature = useContentStore(s => s.deleteSubFeature);
-      const isOpen = expandedSubFeatures.includes(sub.id);
-
-      const getPriorityClass = (priority) => {
-        switch(priority) {
-          case 'critical': return 'priority-critical';
-          case 'high': return 'priority-high';
-          case 'medium': return 'priority-medium';
-          case 'low': return 'priority-low';
-          default: return '';
-        }
+          )
+        }));
       };
 
-      const handleDelete = (e) => {
-        e.stopPropagation();
-        if (confirm(`Delete "${sub.name}"?`)) {
-          deleteSubFeature(moduleId, sub.id);
-          showToast('Sub-feature deleted');
-        }
-      };
-
-      return (
-        <div className="subfeature-card">
-          <div className="subfeature-header" onClick={() => toggleSubExpand(sub.id)}>
-            <span>
-              <span className="subfeature-name">{sub.name}</span>
-              <span className={`priority-badge ${getPriorityClass(sub.priority)}`}>{sub.priority}</span>
-            </span>
-            <span className="expand-icon">{isOpen ? '▲' : '▼'}</span>
-          </div>
-          {isOpen && (
-            <div className="detail-box">
-              <div className="detail-row">
-                <span className="detail-label">Constraints:</span>
-                <span className="detail-value">
-                  {sub.constraints.length ? sub.constraints.map(c => <span key={c} className="chip">{c}</span>) : 'None'}
-                </span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Skills:</span>
-                <span className="detail-value">
-                  {sub.skills.length ? sub.skills.map(s => <span key={s} className="chip">{s}</span>) : 'None'}
-                </span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Plugins:</span>
-                <span className="detail-value">
-                  {sub.plugins.length ? sub.plugins.map(p => <span key={p} className="chip">{p}</span>) : 'None'}
-                </span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Guardrail:</span>
-                <span className={`detail-value guardrail-${sub.guardrailStatus}`}>{sub.guardrailStatus}</span>
-              </div>
-              <button className="btn-small" onClick={() => openEditor(moduleId, sub.id)}>✏️ Edit</button>
-              <button className="btn-delete" onClick={handleDelete}>🗑 Delete</button>
-            </div>
-          )}
-        </div>
-      );
-    };
-
-    const CoreModuleCard = ({ module }) => {
-      const { expandedModules, toggleModuleExpand, showToast } = useUIStore();
-      const addSubFeature = useContentStore(s => s.addSubFeature);
-      const deleteModule = useContentStore(s => s.deleteModule);
-      const isExpanded = expandedModules.includes(module.id);
-
-      const handleDelete = (e) => {
-        e.stopPropagation();
-        if (confirm(`Delete entire module "${module.name}" and all its sub-features?`)) {
-          deleteModule(module.id);
-          showToast('Module deleted');
-        }
-      };
-
-      return (
-        <div className={`module-card ${isExpanded ? 'expanded' : ''}`}>
-          <div className="module-header" onClick={() => toggleModuleExpand(module.id)}>
-            <div>
-              <div className="module-title">{module.name}</div>
-              <div className="module-subtitle">
-                Type: {module.type} • Status: {module.status} • Sub-features: {module.subFeatures.length}
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button className="btn-delete" onClick={handleDelete} style={{ marginTop: 0 }}>🗑</button>
-              <span className="expand-icon">{isExpanded ? '▲' : '▼'}</span>
-            </div>
-          </div>
-          {isExpanded && (
-            <div className="subfeature-list">
-              {module.subFeatures.map(sub => (
-                <SubFeatureCard key={sub.id} moduleId={module.id} sub={sub} />
-              ))}
-              <div className="add-sub-btn">
-                <button className="btn-small" onClick={() => addSubFeature(module.id, 'New Sub-feature')}>+ Add Sub-feature</button>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    };
-
-    const EditModal = () => {
-      const { editingSub, closeEditor, showToast } = useUIStore();
-      const modules = useContentStore(s => s.project.modules);
-      const updateSubFeature = useContentStore(s => s.updateSubFeature);
-      
-      const [priority, setPriority] = React.useState('medium');
-      const [constraintsStr, setConstraintsStr] = React.useState('');
-      const [skills, setSkills] = React.useState([]);
-      const [plugins, setPlugins] = React.useState([]);
-      const [newSkill, setNewSkill] = React.useState('');
-      const [newPlugin, setNewPlugin] = React.useState('');
-
-      const sub = editingSub
-        ? modules.find(m => m.id === editingSub.moduleId)?.subFeatures.find(s => s.id === editingSub.subId)
-        : null;
-
-      React.useEffect(() => {
-        if (sub) {
-          setPriority(sub.priority);
-          const safeConstraints = Array.isArray(sub.constraints) ? sub.constraints : [];
-          setConstraintsStr(safeConstraints.join(', '));
-          setSkills([...sub.skills]);
-          setPlugins([...sub.plugins]);
-        }
-      }, [sub]);
-
-      if (!editingSub || !sub) return null;
-
-      const handleSave = () => {
-        const constraintsArray = (typeof constraintsStr === 'string' ? constraintsStr : '')
-          .split(',')
-          .map(s => s.trim())
-          .filter(Boolean);
-
-        updateSubFeature(editingSub.moduleId, editingSub.subId, {
-          priority,
-          constraints: constraintsArray,
-          skills,
-          plugins,
-          guardrailStatus: (priority === 'critical' && constraintsArray.length === 0) ? 'error' : 'ok',
-        });
-        showToast('Sub-feature updated');
-        closeEditor();
-      };
-
-      const addSkill = () => {
-        if (newSkill.trim() && !skills.includes(newSkill.trim())) {
-          setSkills([...skills, newSkill.trim()]);
-          setNewSkill('');
-        }
-      };
-      const removeSkill = (skill) => setSkills(skills.filter(s => s !== skill));
-
-      const addPlugin = () => {
-        if (newPlugin.trim() && !plugins.includes(newPlugin.trim())) {
-          setPlugins([...plugins, newPlugin.trim()]);
-          setNewPlugin('');
-        }
-      };
-      const removePlugin = (plugin) => setPlugins(plugins.filter(p => p !== plugin));
-
-      return (
-        <div className="modal-overlay" onClick={closeEditor}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <span className="btn-close" onClick={closeEditor}>&times;</span>
-            <div className="modal-title">Edit {sub.name}</div>
-            
-            <label>Priority</label>
-            <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-              <option value="low">Low</option>
-              <option value="medium">Medium</option>
-              <option value="high">High</option>
-              <option value="critical">Critical</option>
-            </select>
-
-            <label>Constraints (comma separated)</label>
-            <input type="text" placeholder="e.g. GDPR, Offline first" value={constraintsStr} onChange={(e) => setConstraintsStr(e.target.value)} />
-
-            <label>Skills</label>
-            <div>
-              {skills.map(skill => (
-                <span key={skill} className="chip" style={{ cursor: 'pointer' }} onClick={() => removeSkill(skill)}>{skill} ✕</span>
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input type="text" placeholder="Add skill" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addSkill()} style={{ flex: 1 }} />
-              <button className="btn-small" onClick={addSkill}>Add</button>
-            </div>
-
-            <label style={{ marginTop: '12px' }}>Plugins</label>
-            <div>
-              {plugins.map(plugin => (
-                <span key={plugin} className="chip" style={{ cursor: 'pointer' }} onClick={() => removePlugin(plugin)}>{plugin} ✕</span>
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <input type="text" placeholder="Add plugin" value={newPlugin} onChange={(e) => setNewPlugin(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addPlugin()} style={{ flex: 1 }} />
-              <button className="btn-small" onClick={addPlugin}>Add</button>
-            </div>
-
-            <button className="btn-primary" onClick={handleSave}>Save</button>
-          </div>
-        </div>
-      );
-    };
-
-    const App = () => {
-      const { project, addModule, resetProject, importProject } = useContentStore();
-      const { editingSub, showToast } = useUIStore();
-      const fileInputRef = React.useRef(null);
-
-      const handleReset = () => {
+      const handleResetProject = () => {
         if (confirm('Delete all modules and start over? This cannot be undone.')) {
-          resetProject();
+          setProject({ projectId: generateId(), modules: [] });
+          localStorage.removeItem(STORAGE_KEY);
           showToast('Project reset');
         }
       };
@@ -704,14 +447,12 @@
           showToast('Project is empty', 'error');
           return;
         }
-        
         const exportData = {
           appName: "AI App Architect Project",
           exportedAt: new Date().toISOString(),
           version: "1.0",
           project: project
         };
-
         const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -721,59 +462,133 @@
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        
         showToast('Project exported successfully!');
       };
 
-      const handleImport = (event) => {
+      const handleImportFile = (event) => {
         const file = event.target.files[0];
         if (!file) return;
-
         const reader = new FileReader();
         reader.onload = (e) => {
           try {
             const parsedData = JSON.parse(e.target.result);
-            // Validate JSON Structure
             if (parsedData && parsedData.project && Array.isArray(parsedData.project.modules)) {
-              importProject(parsedData.project);
+              handleImportProject(parsedData.project);
               showToast('Project imported successfully!');
             } else {
               showToast('Invalid JSON structure', 'error');
             }
           } catch (error) {
-            console.error("Error parsing JSON:", error);
             showToast('Error reading file', 'error');
           }
-          // รีเซ็ตค่า input เผื่อผู้ใช้อัปโหลดไฟล์เดิมซ้ำ
           event.target.value = '';
         };
         reader.readAsText(file);
       };
 
+      // --- UI Toggles ---
+      const toggleModuleExpand = (id) => {
+        setExpandedModules(prev => prev.includes(id) ? prev.filter(m => m !== id) : [...prev, id]);
+      };
+
+      const toggleSubExpand = (id) => {
+        setExpandedSubFeatures(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
+      };
+
+      // ---------- Local Modal Component Inside App ----------
+      const EditModal = () => {
+        const sub = editingSub
+          ? project.modules.find(m => m.id === editingSub.moduleId)?.subFeatures.find(s => s.id === editingSub.subId)
+          : null;
+
+        const [priority, setPriority] = React.useState('medium');
+        const [constraintsStr, setConstraintsStr] = React.useState('');
+        const [skills, setSkills] = React.useState([]);
+        const [plugins, setPlugins] = React.useState([]);
+        const [newSkill, setNewSkill] = React.useState('');
+        const [newPlugin, setNewPlugin] = React.useState('');
+
+        React.useEffect(() => {
+          if (sub) {
+            setPriority(sub.priority || 'medium');
+            setConstraintsStr(Array.isArray(sub.constraints) ? sub.constraints.join(', ') : '');
+            setSkills([...(sub.skills || [])]);
+            setPlugins([...(sub.plugins || [])]);
+          }
+        }, [sub]);
+
+        if (!editingSub || !sub) return null;
+
+        const handleSave = () => {
+          const constraintsArray = constraintsStr.split(',').map(s => s.trim()).filter(Boolean);
+          handleUpdateSubFeature(editingSub.moduleId, editingSub.subId, {
+            priority,
+            constraints: constraintsArray,
+            skills,
+            plugins,
+            guardrailStatus: (priority === 'critical' && constraintsArray.length === 0) ? 'error' : 'ok',
+          });
+          showToast('Sub-feature updated');
+          setEditingSub(null);
+        };
+
+        return (
+          <div className="modal-overlay" onClick={() => setEditingSub(null)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <span className="btn-close" onClick={() => setEditingSub(null)}>&times;</span>
+              <div className="modal-title">Edit {sub.name}</div>
+              
+              <label>Priority</label>
+              <select value={priority} onChange={(e) => setPriority(e.target.value)}>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+                <option value="critical">Critical</option>
+              </select>
+
+              <label>Constraints (comma separated)</label>
+              <input type="text" value={constraintsStr} onChange={(e) => setConstraintsStr(e.target.value)} />
+
+              <label>Skills</label>
+              <div>
+                {skills.map(s => (
+                  <span key={s} className="chip" style={{ cursor: 'pointer' }} onClick={() => setSkills(skills.filter(i => i !== s))}>{s} ✕</span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type="text" placeholder="Add skill" value={newSkill} onChange={(e) => setNewSkill(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (newSkill.trim() && !skills.includes(newSkill.trim()) && (setSkills([...skills, newSkill.trim()]), setNewSkill('')))} style={{ flex: 1 }} />
+                <button className="btn-small" onClick={() => newSkill.trim() && !skills.includes(newSkill.trim()) && (setSkills([...skills, newSkill.trim()]), setNewSkill(''))}>Add</button>
+              </div>
+
+              <label style={{ marginTop: '12px' }}>Plugins</label>
+              <div>
+                {plugins.map(p => (
+                  <span key={p} className="chip" style={{ cursor: 'pointer' }} onClick={() => setPlugins(plugins.filter(i => i !== p))}>{p} ✕</span>
+                ))}
+              </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <input type="text" placeholder="Add plugin" value={newPlugin} onChange={(e) => setNewPlugin(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && (newPlugin.trim() && !plugins.includes(newPlugin.trim()) && (setPlugins([...plugins, newPlugin.trim()]), setNewPlugin('')))} style={{ flex: 1 }} />
+                <button className="btn-small" onClick={() => newPlugin.trim() && !plugins.includes(newPlugin.trim()) && (setPlugins([...plugins, newPlugin.trim()]), setNewPlugin(''))}>Add</button>
+              </div>
+
+              <button className="btn-primary" onClick={handleSave}>Save</button>
+            </div>
+          </div>
+        );
+      };
+
       return (
         <div className="container">
-          <Toast />
+          {toast.message && <div className={`toast ${toast.type === 'error' ? 'error' : ''}`}>{toast.message}</div>}
           
           <div className="app-header">
             <h2 className="app-title">🧠 AI App Architect</h2>
           </div>
 
-          {/* แถบเครื่องมือสำหรับ Export / Import */}
           <div className="action-bar">
-            <button className="btn-action" onClick={() => fileInputRef.current.click()}>
-              📥 Import JSON
-            </button>
-            <input 
-              type="file" 
-              accept=".json" 
-              style={{ display: 'none' }} 
-              ref={fileInputRef} 
-              onChange={handleImport} 
-            />
-            
-            <button className="btn-action" onClick={handleExport}>
-              📤 Export JSON
-            </button>
+            <button className="btn-action" onClick={() => fileInputRef.current.click()}>📥 Import JSON</button>
+            <input type="file" accept=".json" style={{ display: 'none' }} ref={fileInputRef} onChange={handleImportFile} />
+            <button className="btn-action" onClick={handleExport}>📤 Export JSON</button>
           </div>
 
           {project.modules.length === 0 && (
@@ -784,27 +599,70 @@
             </div>
           )}
 
-          {project.modules.map(mod => (
-            <CoreModuleCard key={mod.id} module={mod} />
-          ))}
+          {project.modules.map(mod => {
+            const isExpanded = expandedModules.includes(mod.id);
+            return (
+              <div key={mod.id} className="module-card">
+                <div className="module-header" onClick={() => toggleModuleExpand(mod.id)}>
+                  <div>
+                    <div className="module-title">{mod.name}</div>
+                    <div className="module-subtitle">Type: {mod.type} • Status: {mod.status} • Sub-features: {mod.subFeatures.length}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button className="btn-delete" onClick={(e) => { e.stopPropagation(); if(confirm(`Delete module "${mod.name}"?`)) { handleDeleteModule(mod.id); showToast('Module deleted'); } }} style={{ marginTop: 0 }}>🗑</button>
+                    <span className="expand-icon">{isExpanded ? '▲' : '▼'}</span>
+                  </div>
+                </div>
+                
+                {isExpanded && (
+                  <div className="subfeature-list">
+                    {mod.subFeatures.map(sub => {
+                      const isSubOpen = expandedSubFeatures.includes(sub.id);
+                      return (
+                        <div key={sub.id} className="subfeature-card">
+                          <div className="subfeature-header" onClick={() => toggleSubExpand(sub.id)}>
+                            <span>
+                              <span className="subfeature-name">{sub.name}</span>
+                              <span className={`priority-badge priority-${sub.priority}`}>{sub.priority}</span>
+                            </span>
+                            <span className="expand-icon">{isSubOpen ? '▲' : '▼'}</span>
+                          </div>
+                          {isSubOpen && (
+                            <div className="detail-box">
+                              <div className="detail-row"><span className="detail-label">Constraints:</span><span className="detail-value">{sub.constraints.length ? sub.constraints.map(c => <span key={c} className="chip">{c}</span>) : 'None'}</span></div>
+                              <div className="detail-row"><span className="detail-label">Skills:</span><span className="detail-value">{sub.skills.length ? sub.skills.map(s => <span key={s} className="chip">{s}</span>) : 'None'}</span></div>
+                              <div className="detail-row"><span className="detail-label">Plugins:</span><span className="detail-value">{sub.plugins.length ? sub.plugins.map(p => <span key={p} className="chip">{p}</span>) : 'None'}</span></div>
+                              <div className="detail-row"><span className="detail-label">Guardrail:</span><span className={`detail-value guardrail-${sub.guardrailStatus}`}>{sub.guardrailStatus}</span></div>
+                              <button className="btn-small" onClick={() => setEditingSub({ moduleId: mod.id, subId: sub.id })}>✏️ Edit</button>
+                              <button className="btn-delete" onClick={() => { if(confirm(`Delete "${sub.name}"?`)) { handleDeleteSubFeature(mod.id, sub.id); showToast('Sub-feature deleted'); } }}>🗑 Delete</button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                    <div className="add-sub-btn">
+                      <button className="btn-small" onClick={() => handleAddSubFeature(mod.id, 'New Sub-feature')}>+ Add Sub-feature</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
-          <button className="fab" onClick={() => addModule('New Module', 'feature')}>
+          <button className="fab" onClick={() => handleAddModule('New Module', 'feature')}>
             <span style={{ fontSize: '20px' }}>+</span> Add Core Module
           </button>
           
           {project.modules.length > 0 && (
-            <button className="fab-delete" onClick={handleReset}>
-              🗑 Reset All
-            </button>
+            <button className="fab-delete" onClick={handleResetProject}>🗑 Reset All</button>
           )}
 
-          {editingSub && <EditModal />}
+          <EditModal />
         </div>
       );
     };
 
-    const container = document.getElementById('root');
-    const root = ReactDOM.createRoot(container);
+    const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(<App />);
   </script>
 </body>
