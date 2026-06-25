@@ -5,12 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>AI App Architect</title>
 
-  <!-- React 18 CDN -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-
-  <!-- Babel Standalone -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- React 18 CDN (UMD) -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500&display=swap" rel="stylesheet">
@@ -19,9 +16,9 @@
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
     body { background: #EFF6FF; padding: 16px; min-height: 100vh; }
     .container { max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
-    .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .app-header { margin-bottom: 16px; }
     .app-title { color: #1E3A8A; font-weight: 500; font-size: 24px; }
-    .stats { font-size: 13px; color: #64748B; }
+    .stats { font-size: 13px; color: #64748B; margin-top: 4px; }
     .action-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
     .btn-action {
       background: white; border: 1px solid #CBD5E1; color: #475569; border-radius: 8px;
@@ -35,13 +32,11 @@
       box-shadow: 0 4px 12px rgba(59,130,246,0.4); cursor: pointer; display: flex;
       align-items: center; gap: 6px; z-index: 1000;
     }
-    .fab:hover { background: #2563EB; }
     .fab-reset {
       position: fixed; bottom: 20px; left: 20px; background: #EF4444; color: white;
       border: none; border-radius: 50px; padding: 14px 24px; font-size: 14px; font-weight: 500;
       box-shadow: 0 4px 12px rgba(239,68,68,0.4); cursor: pointer; z-index: 1000;
     }
-    .fab-reset:hover { background: #DC2626; }
     .module-card {
       background: white; border-radius: 16px; padding: 16px; margin-bottom: 16px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
@@ -49,8 +44,9 @@
     .module-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
     .module-title { font-size: 18px; font-weight: 500; color: #1E3A8A; }
     .module-subtitle { font-size: 13px; color: #64748B; margin-top: 2px; }
-    .expand-icon { font-size: 20px; color: #64748B; transition: transform 0.2s; }
-    .subfeature-list { margin-top: 12px; }
+    .expand-icon { font-size: 18px; color: #64748B; }
+    .subfeature-list { margin-top: 12px; display: none; }
+    .subfeature-list.open { display: block; }
     .subfeature-card {
       background: #E8F0FE; border-radius: 12px; padding: 12px; margin: 8px 0;
     }
@@ -58,9 +54,11 @@
     .subfeature-name { font-weight: 500; color: #1E3A8A; }
     .detail-box {
       margin-top: 10px; padding: 10px; background: rgba(255,255,255,0.6); border-radius: 8px;
+      display: none;
     }
+    .detail-box.open { display: block; }
     .detail-row { display: flex; margin-bottom: 6px; font-size: 13px; }
-    .detail-label { font-weight: 500; width: 80px; color: #334155; }
+    .detail-label { font-weight: 500; min-width: 80px; color: #334155; }
     .detail-value { color: #1E293B; flex: 1; }
     .chip {
       display: inline-block; background: #DBEAFE; color: #1E40AF; border-radius: 20px;
@@ -74,29 +72,6 @@
       background: transparent; border: 1px solid #EF4444; color: #EF4444;
       border-radius: 20px; padding: 4px 12px; font-size: 12px; cursor: pointer;
       margin-top: 6px; margin-left: 6px;
-    }
-    .add-sub-btn { margin-top: 10px; }
-    .modal-overlay {
-      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.4); display: flex; align-items: center;
-      justify-content: center; z-index: 2000;
-    }
-    .modal-content {
-      background: white; border-radius: 16px; padding: 24px; width: 90%;
-      max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative;
-    }
-    .modal-title { font-size: 20px; font-weight: 500; margin-bottom: 16px; color: #1E3A8A; }
-    input, textarea, select {
-      width: 100%; padding: 8px 12px; margin: 8px 0; border: 1px solid #CBD5E1;
-      border-radius: 8px; font-size: 14px;
-    }
-    .btn-primary {
-      background: #3B82F6; color: white; border: none; border-radius: 8px;
-      padding: 10px 20px; font-weight: 500; cursor: pointer; margin-top: 12px; width: 100%;
-    }
-    .btn-close {
-      background: transparent; border: none; font-size: 24px;
-      position: absolute; top: 10px; right: 16px; cursor: pointer;
     }
     .empty-state { text-align: center; color: #64748B; margin-top: 60px; }
     .guardrail-ok { color: #10B981; }
@@ -114,8 +89,9 @@
       position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
       background: #10B981; color: white; padding: 10px 20px; border-radius: 8px;
       font-size: 14px; z-index: 3000; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      animation: fadeInOut 2.5s ease forwards; pointer-events: none;
+      display: none;
     }
+    .toast.show { display: block; animation: fadeInOut 2.5s ease forwards; }
     .toast.error { background: #EF4444; }
     @keyframes fadeInOut {
       0% { opacity: 0; top: 0; }
@@ -123,292 +99,499 @@
       85% { opacity: 1; top: 20px; }
       100% { opacity: 0; top: 0; }
     }
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4); display: none; align-items: center;
+      justify-content: center; z-index: 2000;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-content {
+      background: white; border-radius: 16px; padding: 24px; width: 90%;
+      max-width: 400px; max-height: 80vh; overflow-y: auto; position: relative;
+    }
+    .modal-title { font-size: 20px; font-weight: 500; margin-bottom: 16px; color: #1E3A8A; }
+    input, textarea, select {
+      width: 100%; padding: 8px 12px; margin: 8px 0; border: 1px solid #CBD5E1;
+      border-radius: 8px; font-size: 14px;
+    }
+    .btn-primary {
+      background: #3B82F6; color: white; border: none; border-radius: 8px;
+      padding: 10px 20px; font-weight: 500; cursor: pointer; margin-top: 12px; width: 100%;
+    }
+    .btn-close {
+      background: transparent; border: none; font-size: 24px;
+      position: absolute; top: 10px; right: 16px; cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div id="root"></div>
 
   <script>
-    // ฟังก์ชัน generate ID (อยู่นอก Babel เพื่อความปลอดภัย)
-    function generateId() {
-      return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
-    }
+    // ==================== AI App Architect ====================
+    (function() {
+      const { createElement: h, useState, useEffect, useRef, Fragment } = React;
 
-    // LocalStorage helpers
-    var STORAGE_KEY = 'ai_app_architect_project';
-    function loadProject() {
-      try {
-        var saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          var parsed = JSON.parse(saved);
-          if (parsed && Array.isArray(parsed.modules)) {
-            return { projectId: parsed.projectId || generateId(), modules: parsed.modules };
-          }
-        }
-      } catch(e) {}
-      return { projectId: generateId(), modules: [] };
-    }
-    function saveProject(project) {
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(project)); } catch(e) {}
-    }
-  </script>
+      function generateId() {
+        return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now().toString(36);
+      }
 
-  <script type="text/babel">
-    const App = () => {
-      const [project, setProject] = React.useState(loadProject);
-      const [expandedModules, setExpandedModules] = React.useState([]);
-      const [expandedSubFeatures, setExpandedSubFeatures] = React.useState([]);
-      const [editingSub, setEditingSub] = React.useState(null);
-      const [toast, setToast] = React.useState(null);
-      const fileInputRef = React.useRef(null);
+      const STORAGE_KEY = 'ai_app_architect_project';
 
-      React.useEffect(() => { saveProject(project); }, [project]);
-
-      const showToast = (msg, error) => {
-        setToast({ msg, error });
-        setTimeout(() => setToast(null), 2500);
-      };
-
-      const addModule = () => setProject(prev => ({
-        ...prev,
-        modules: [...prev.modules, { id: generateId(), name: 'New Module', type: 'feature', status: 'draft', subFeatures: [] }]
-      }));
-
-      const addSubFeature = (moduleId) => setProject(prev => ({
-        ...prev,
-        modules: prev.modules.map(m => m.id === moduleId ? {
-          ...m,
-          subFeatures: [...m.subFeatures, { id: generateId(), name: 'New Sub-feature', priority: 'medium', constraints: [], skills: [], plugins: [], guardrailStatus: 'warning' }]
-        } : m)
-      }));
-
-      const updateSubFeature = (moduleId, subId, data) => setProject(prev => ({
-        ...prev,
-        modules: prev.modules.map(m => m.id === moduleId ? {
-          ...m,
-          subFeatures: m.subFeatures.map(s => s.id === subId ? { ...s, ...data } : s)
-        } : m)
-      }));
-
-      const deleteModule = (id) => {
-        if (!confirm('Delete this module and all its sub-features?')) return;
-        setProject(prev => ({ ...prev, modules: prev.modules.filter(m => m.id !== id) }));
-        showToast('Module deleted');
-      };
-
-      const deleteSubFeature = (moduleId, subId) => {
-        if (!confirm('Delete this sub-feature?')) return;
-        setProject(prev => ({
-          ...prev,
-          modules: prev.modules.map(m => m.id === moduleId ? {
-            ...m,
-            subFeatures: m.subFeatures.filter(s => s.id !== subId)
-          } : m)
-        }));
-        showToast('Sub-feature deleted');
-      };
-
-      const resetAll = () => {
-        if (!confirm('Delete everything? This cannot be undone.')) return;
-        const empty = { projectId: generateId(), modules: [] };
-        setProject(empty);
-        localStorage.removeItem(STORAGE_KEY);
-        setExpandedModules([]);
-        setExpandedSubFeatures([]);
-        setEditingSub(null);
-        showToast('Project reset');
-      };
-
-      const handleExport = () => {
-        if (project.modules.length === 0) return showToast('Project is empty', true);
-        const data = { appName: 'AI App Architect', exportedAt: new Date().toISOString(), version: '1.0', project };
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'ai-app-architect-' + Date.now() + '.json';
-        a.click();
-        showToast('Exported successfully!');
-      };
-
-      const handleImport = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-          try {
-            const data = JSON.parse(ev.target.result);
-            const proj = data.project || data;
-            if (proj && Array.isArray(proj.modules)) {
-              setProject(proj);
-              setExpandedModules([]);
-              setExpandedSubFeatures([]);
-              setEditingSub(null);
-              showToast('Imported successfully!');
-            } else {
-              showToast('Invalid JSON structure', true);
+      function loadProject() {
+        try {
+          var saved = localStorage.getItem(STORAGE_KEY);
+          if (saved) {
+            var parsed = JSON.parse(saved);
+            if (parsed && Array.isArray(parsed.modules)) {
+              return { projectId: parsed.projectId || generateId(), modules: parsed.modules };
             }
-          } catch(ex) {
-            showToast('Could not parse file', true);
           }
-        };
-        reader.readAsText(file);
-        e.target.value = '';
-      };
+        } catch(e) {}
+        return { projectId: generateId(), modules: [] };
+      }
 
-      const toggleModule = (id) => setExpandedModules(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-      const toggleSub = (id) => setExpandedSubFeatures(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+      function saveProject(project) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(project)); } catch(e) {}
+      }
 
-      // Edit Modal
-      const EditModal = () => {
+      // ============ EditModal Component ============
+      function EditModal({ editingSub, project, onSave, onClose }) {
         if (!editingSub) return null;
-        const sub = project.modules.find(m => m.id === editingSub.mid)?.subFeatures.find(s => s.id === editingSub.sid);
+
+        const module = project.modules.find(function(m) { return m.id === editingSub.mid; });
+        if (!module) return null;
+        const sub = module.subFeatures.find(function(s) { return s.id === editingSub.sid; });
         if (!sub) return null;
 
-        const [priority, setPriority] = React.useState(sub.priority);
-        const [constraintsStr, setConstraintsStr] = React.useState((sub.constraints || []).join(', '));
-        const [skills, setSkills] = React.useState([...(sub.skills || [])]);
-        const [plugins, setPlugins] = React.useState([...(sub.plugins || [])]);
-        const [newSkill, setNewSkill] = React.useState('');
-        const [newPlugin, setNewPlugin] = React.useState('');
+        const [priority, setPriority] = useState(sub.priority || 'medium');
+        const [constraintsStr, setConstraintsStr] = useState((sub.constraints || []).join(', '));
+        const [skills, setSkills] = useState([].concat(sub.skills || []));
+        const [plugins, setPlugins] = useState([].concat(sub.plugins || []));
+        const [newSkill, setNewSkill] = useState('');
+        const [newPlugin, setNewPlugin] = useState('');
 
-        const save = () => {
-          const constraints = constraintsStr.split(',').map(s => s.trim()).filter(Boolean);
-          updateSubFeature(editingSub.mid, editingSub.sid, {
-            priority,
-            constraints,
-            skills,
-            plugins,
+        function addSkill() {
+          if (newSkill.trim() && skills.indexOf(newSkill.trim()) === -1) {
+            setSkills(skills.concat([newSkill.trim()]));
+            setNewSkill('');
+          }
+        }
+
+        function addPlugin() {
+          if (newPlugin.trim() && plugins.indexOf(newPlugin.trim()) === -1) {
+            setPlugins(plugins.concat([newPlugin.trim()]));
+            setNewPlugin('');
+          }
+        }
+
+        function handleSave() {
+          var constraints = constraintsStr.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+          onSave(editingSub.mid, editingSub.sid, {
+            priority: priority,
+            constraints: constraints,
+            skills: skills,
+            plugins: plugins,
             guardrailStatus: (priority === 'critical' && constraints.length === 0) ? 'error' : 'ok'
           });
-          showToast('Sub-feature updated');
-          setEditingSub(null);
-        };
+          onClose();
+        }
 
-        const addS = () => { if (newSkill.trim() && !skills.includes(newSkill.trim())) { setSkills([...skills, newSkill.trim()]); setNewSkill(''); } };
-        const addP = () => { if (newPlugin.trim() && !plugins.includes(newPlugin.trim())) { setPlugins([...plugins, newPlugin.trim()]); setNewPlugin(''); } };
+        return h('div', { className: 'modal-overlay show', onClick: onClose },
+          h('div', { className: 'modal-content', onClick: function(e) { e.stopPropagation(); } },
+            h('span', { className: 'btn-close', onClick: onClose }, '\u00D7'),
+            h('div', { className: 'modal-title' }, 'Edit ' + sub.name),
 
-        return (
-          <div className="modal-overlay" onClick={() => setEditingSub(null)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <span className="btn-close" onClick={() => setEditingSub(null)}>&times;</span>
-              <div className="modal-title">Edit {sub.name}</div>
-              
-              <label>Priority</label>
-              <select value={priority} onChange={e => setPriority(e.target.value)}>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
-                <option value="critical">Critical</option>
-              </select>
+            h('label', null, 'Priority'),
+            h('select', { value: priority, onChange: function(e) { setPriority(e.target.value); } },
+              h('option', { value: 'low' }, 'Low'),
+              h('option', { value: 'medium' }, 'Medium'),
+              h('option', { value: 'high' }, 'High'),
+              h('option', { value: 'critical' }, 'Critical')
+            ),
 
-              <label>Constraints (comma separated)</label>
-              <input type="text" value={constraintsStr} onChange={e => setConstraintsStr(e.target.value)} placeholder="e.g. GDPR, Offline first" />
+            h('label', null, 'Constraints (comma separated)'),
+            h('input', { type: 'text', value: constraintsStr, onChange: function(e) { setConstraintsStr(e.target.value); }, placeholder: 'e.g. GDPR, Offline first' }),
 
-              <label>Skills</label>
-              <div>{skills.map(s => <span key={s} className="chip" style={{cursor:'pointer'}} onClick={() => setSkills(skills.filter(x => x !== s))}>{s} ✕</span>)}</div>
-              <div style={{display:'flex',gap:'8px'}}>
-                <input type="text" placeholder="Add skill" value={newSkill} onChange={e => setNewSkill(e.target.value)} onKeyDown={e => e.key === 'Enter' && addS()} style={{flex:1}} />
-                <button className="btn-small" onClick={addS}>Add</button>
-              </div>
+            h('label', null, 'Skills'),
+            h('div', null,
+              skills.map(function(s) {
+                return h('span', { key: s, className: 'chip', style: { cursor: 'pointer' }, onClick: function() { setSkills(skills.filter(function(x) { return x !== s; })); } }, s + ' \u2715');
+              })
+            ),
+            h('div', { style: { display: 'flex', gap: '8px' } },
+              h('input', { type: 'text', placeholder: 'Add skill', value: newSkill, onChange: function(e) { setNewSkill(e.target.value); }, onKeyDown: function(e) { if (e.key === 'Enter') addSkill(); }, style: { flex: 1 } }),
+              h('button', { className: 'btn-small', onClick: addSkill }, 'Add')
+            ),
 
-              <label style={{marginTop:'12px'}}>Plugins</label>
-              <div>{plugins.map(p => <span key={p} className="chip" style={{cursor:'pointer'}} onClick={() => setPlugins(plugins.filter(x => x !== p))}>{p} ✕</span>)}</div>
-              <div style={{display:'flex',gap:'8px'}}>
-                <input type="text" placeholder="Add plugin" value={newPlugin} onChange={e => setNewPlugin(e.target.value)} onKeyDown={e => e.key === 'Enter' && addP()} style={{flex:1}} />
-                <button className="btn-small" onClick={addP}>Add</button>
-              </div>
+            h('label', { style: { marginTop: '12px' } }, 'Plugins'),
+            h('div', null,
+              plugins.map(function(p) {
+                return h('span', { key: p, className: 'chip', style: { cursor: 'pointer' }, onClick: function() { setPlugins(plugins.filter(function(x) { return x !== p; })); } }, p + ' \u2715');
+              })
+            ),
+            h('div', { style: { display: 'flex', gap: '8px' } },
+              h('input', { type: 'text', placeholder: 'Add plugin', value: newPlugin, onChange: function(e) { setNewPlugin(e.target.value); }, onKeyDown: function(e) { if (e.key === 'Enter') addPlugin(); }, style: { flex: 1 } }),
+              h('button', { className: 'btn-small', onClick: addPlugin }, 'Add')
+            ),
 
-              <button className="btn-primary" onClick={save}>💾 Save</button>
-            </div>
-          </div>
+            h('button', { className: 'btn-primary', onClick: handleSave }, '\uD83D\uDCBE Save')
+          )
         );
-      };
+      }
 
-      const total = project.modules.reduce((s,m) => s + m.subFeatures.length, 0);
-      const errors = project.modules.reduce((s,m) => s + m.subFeatures.filter(f => f.guardrailStatus === 'error').length, 0);
+      // ============ App Component ============
+      function App() {
+        const [project, setProject] = useState(loadProject);
+        const [expandedModules, setExpandedModules] = useState([]);
+        const [expandedSubFeatures, setExpandedSubFeatures] = useState([]);
+        const [editingSub, setEditingSub] = useState(null);
+        const [toast, setToast] = useState(null);
+        const fileInputRef = useRef(null);
 
-      return (
-        <div className="container">
-          {toast && <div className={`toast ${toast.error ? 'error' : ''}`}>{toast.msg}</div>}
+        useEffect(function() {
+          saveProject(project);
+        }, [project]);
 
-          <div className="app-header">
-            <div>
-              <h2 className="app-title">🧠 AI App Architect</h2>
-              <div className="stats">{project.modules.length} modules • {total} sub-features{errors > 0 && <span style={{color:'#EF4444',marginLeft:'8px'}}>• {errors} issues</span>}</div>
-            </div>
-          </div>
+        function showToast(msg, isError) {
+          setToast({ msg: msg, error: isError });
+          setTimeout(function() { setToast(null); }, 2500);
+        }
 
-          <div className="action-bar">
-            <button className="btn-action" onClick={() => fileInputRef.current.click()}>📥 Import JSON</button>
-            <input type="file" accept=".json" style={{display:'none'}} ref={fileInputRef} onChange={handleImport} />
-            <button className="btn-action" onClick={handleExport}>📤 Export JSON</button>
-          </div>
+        function addModule() {
+          setProject(function(prev) {
+            return {
+              projectId: prev.projectId,
+              modules: prev.modules.concat([{
+                id: generateId(),
+                name: 'New Module',
+                type: 'feature',
+                status: 'draft',
+                subFeatures: []
+              }])
+            };
+          });
+        }
 
-          {project.modules.length === 0 && (
-            <div className="empty-state">
-              <p style={{fontSize:'40px',marginBottom:'12px'}}>🏗️</p>
-              <p style={{fontSize:'18px',marginBottom:'8px'}}>No modules yet</p>
-              <p>Tap <strong>+ Add Core Module</strong> to start designing!</p>
-            </div>
-          )}
+        function addSubFeature(moduleId) {
+          setProject(function(prev) {
+            return {
+              projectId: prev.projectId,
+              modules: prev.modules.map(function(m) {
+                if (m.id !== moduleId) return m;
+                return {
+                  id: m.id,
+                  name: m.name,
+                  type: m.type,
+                  status: m.status,
+                  subFeatures: m.subFeatures.concat([{
+                    id: generateId(),
+                    name: 'New Sub-feature',
+                    priority: 'medium',
+                    constraints: [],
+                    skills: [],
+                    plugins: [],
+                    guardrailStatus: 'warning'
+                  }])
+                };
+              })
+            };
+          });
+        }
 
-          {project.modules.map(mod => {
-            const open = expandedModules.includes(mod.id);
-            return (
-              <div key={mod.id} className="module-card">
-                <div className="module-header" onClick={() => toggleModule(mod.id)}>
-                  <div>
-                    <div className="module-title">{mod.name}</div>
-                    <div className="module-subtitle">Type: {mod.type} • Sub-features: {mod.subFeatures.length}</div>
-                  </div>
-                  <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                    <button className="btn-delete" onClick={e => { e.stopPropagation(); deleteModule(mod.id); }} style={{marginTop:0}}>🗑</button>
-                    <span className="expand-icon">{open ? '▲' : '▼'}</span>
-                  </div>
-                </div>
-                {open && (
-                  <div className="subfeature-list">
-                    {mod.subFeatures.map(sub => {
-                      const sOpen = expandedSubFeatures.includes(sub.id);
-                      return (
-                        <div key={sub.id} className="subfeature-card">
-                          <div className="subfeature-header" onClick={() => toggleSub(sub.id)}>
-                            <span>
-                              <span className="subfeature-name">{sub.name}</span>
-                              <span className={`priority-badge priority-${sub.priority}`}>{sub.priority}</span>
-                            </span>
-                            <span className="expand-icon">{sOpen ? '▲' : '▼'}</span>
-                          </div>
-                          {sOpen && (
-                            <div className="detail-box">
-                              <div className="detail-row"><span className="detail-label">Constraints:</span><span className="detail-value">{sub.constraints.length ? sub.constraints.map(c => <span key={c} className="chip">{c}</span>) : 'None'}</span></div>
-                              <div className="detail-row"><span className="detail-label">Skills:</span><span className="detail-value">{sub.skills.length ? sub.skills.map(s => <span key={s} className="chip">{s}</span>) : 'None'}</span></div>
-                              <div className="detail-row"><span className="detail-label">Plugins:</span><span className="detail-value">{sub.plugins.length ? sub.plugins.map(p => <span key={p} className="chip">{p}</span>) : 'None'}</span></div>
-                              <div className="detail-row"><span className="detail-label">Guardrail:</span><span className={`detail-value guardrail-${sub.guardrailStatus}`}>{sub.guardrailStatus}</span></div>
-                              <button className="btn-small" onClick={() => setEditingSub({mid: mod.id, sid: sub.id})}>✏️ Edit</button>
-                              <button className="btn-delete" onClick={() => deleteSubFeature(mod.id, sub.id)}>🗑 Delete</button>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                    <div className="add-sub-btn">
-                      <button className="btn-small" onClick={() => addSubFeature(mod.id)}>+ Add Sub-feature</button>
-                    </div>
-                  </div>
-                )}
-              </div>
+        function updateSubFeature(moduleId, subId, data) {
+          setProject(function(prev) {
+            return {
+              projectId: prev.projectId,
+              modules: prev.modules.map(function(m) {
+                if (m.id !== moduleId) return m;
+                return {
+                  id: m.id,
+                  name: m.name,
+                  type: m.type,
+                  status: m.status,
+                  subFeatures: m.subFeatures.map(function(s) {
+                    if (s.id !== subId) return s;
+                    var updated = {};
+                    Object.keys(s).forEach(function(k) { updated[k] = s[k]; });
+                    Object.keys(data).forEach(function(k) { updated[k] = data[k]; });
+                    return updated;
+                  })
+                };
+              })
+            };
+          });
+        }
+
+        function deleteModule(id) {
+          if (!confirm('Delete this module and all its sub-features?')) return;
+          setProject(function(prev) {
+            return {
+              projectId: prev.projectId,
+              modules: prev.modules.filter(function(m) { return m.id !== id; })
+            };
+          });
+          showToast('Module deleted');
+        }
+
+        function deleteSubFeature(moduleId, subId) {
+          if (!confirm('Delete this sub-feature?')) return;
+          setProject(function(prev) {
+            return {
+              projectId: prev.projectId,
+              modules: prev.modules.map(function(m) {
+                if (m.id !== moduleId) return m;
+                return {
+                  id: m.id,
+                  name: m.name,
+                  type: m.type,
+                  status: m.status,
+                  subFeatures: m.subFeatures.filter(function(s) { return s.id !== subId; })
+                };
+              })
+            };
+          });
+          showToast('Sub-feature deleted');
+        }
+
+        function resetAll() {
+          if (!confirm('Delete everything? This cannot be undone.')) return;
+          var empty = { projectId: generateId(), modules: [] };
+          setProject(empty);
+          localStorage.removeItem(STORAGE_KEY);
+          setExpandedModules([]);
+          setExpandedSubFeatures([]);
+          setEditingSub(null);
+          showToast('Project reset');
+        }
+
+        function handleExport() {
+          if (project.modules.length === 0) return showToast('Project is empty', true);
+          var data = {
+            appName: 'AI App Architect',
+            exportedAt: new Date().toISOString(),
+            version: '1.0',
+            project: project
+          };
+          var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          var a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'ai-app-architect-' + Date.now() + '.json';
+          a.click();
+          showToast('Exported successfully!');
+        }
+
+        function handleImport(e) {
+          var file = e.target.files[0];
+          if (!file) return;
+          var reader = new FileReader();
+          reader.onload = function(ev) {
+            try {
+              var data = JSON.parse(ev.target.result);
+              var proj = data.project || data;
+              if (proj && Array.isArray(proj.modules)) {
+                setProject(proj);
+                setExpandedModules([]);
+                setExpandedSubFeatures([]);
+                setEditingSub(null);
+                showToast('Imported successfully!');
+              } else {
+                showToast('Invalid JSON structure', true);
+              }
+            } catch(ex) {
+              showToast('Could not parse file', true);
+            }
+          };
+          reader.readAsText(file);
+          e.target.value = '';
+        }
+
+        function toggleModule(id) {
+          setExpandedModules(function(prev) {
+            return prev.indexOf(id) === -1 ? prev.concat([id]) : prev.filter(function(x) { return x !== id; });
+          });
+        }
+
+        function toggleSub(id) {
+          setExpandedSubFeatures(function(prev) {
+            return prev.indexOf(id) === -1 ? prev.concat([id]) : prev.filter(function(x) { return x !== id; });
+          });
+        }
+
+        var totalSubFeatures = project.modules.reduce(function(s, m) { return s + m.subFeatures.length; }, 0);
+        var errorCount = project.modules.reduce(function(s, m) {
+          return s + m.subFeatures.filter(function(f) { return f.guardrailStatus === 'error'; }).length;
+        }, 0);
+
+        // Build children array
+        var children = [];
+
+        // Toast
+        if (toast) {
+          children.push(
+            h('div', { key: 'toast', className: 'toast show' + (toast.error ? ' error' : '') }, toast.msg)
+          );
+        }
+
+        // Header
+        children.push(
+          h('div', { key: 'header', className: 'app-header' },
+            h('h2', { className: 'app-title' }, '\uD83E\uDDE0 AI App Architect'),
+            h('div', { className: 'stats' },
+              project.modules.length + ' modules \u2022 ' + totalSubFeatures + ' sub-features' +
+              (errorCount > 0 ? h('span', { style: { color: '#EF4444', marginLeft: '8px' } }, ' \u2022 ' + errorCount + ' issues') : null)
+            )
+          )
+        );
+
+        // Action Bar
+        children.push(
+          h('div', { key: 'actions', className: 'action-bar' },
+            h('button', { className: 'btn-action', onClick: function() { fileInputRef.current.click(); } }, '\uD83D\uDCE5 Import JSON'),
+            h('input', { type: 'file', accept: '.json', style: { display: 'none' }, ref: fileInputRef, onChange: handleImport }),
+            h('button', { className: 'btn-action', onClick: handleExport }, '\uD83D\uDCE4 Export JSON')
+          )
+        );
+
+        // Empty state
+        if (project.modules.length === 0) {
+          children.push(
+            h('div', { key: 'empty', className: 'empty-state' },
+              h('p', { style: { fontSize: '40px', marginBottom: '12px' } }, '\uD83C\uDFD7\uFE0F'),
+              h('p', { style: { fontSize: '18px', marginBottom: '8px' } }, 'No modules yet'),
+              h('p', null, 'Tap ', h('strong', null, '+ Add Core Module'), ' to start designing!')
+            )
+          );
+        }
+
+        // Module Cards
+        project.modules.forEach(function(mod) {
+          var isOpen = expandedModules.indexOf(mod.id) !== -1;
+          var modChildren = [];
+
+          // Sub-features
+          if (isOpen) {
+            var subListChildren = [];
+
+            mod.subFeatures.forEach(function(sub) {
+              var sOpen = expandedSubFeatures.indexOf(sub.id) !== -1;
+              var subChildren = [];
+
+              if (sOpen) {
+                subChildren.push(
+                  h('div', { key: 'details', className: 'detail-box open' },
+                    h('div', { className: 'detail-row' },
+                      h('span', { className: 'detail-label' }, 'Constraints:'),
+                      h('span', { className: 'detail-value' },
+                        sub.constraints.length > 0
+                          ? sub.constraints.map(function(c) { return h('span', { key: c, className: 'chip' }, c); })
+                          : 'None'
+                      )
+                    ),
+                    h('div', { className: 'detail-row' },
+                      h('span', { className: 'detail-label' }, 'Skills:'),
+                      h('span', { className: 'detail-value' },
+                        sub.skills.length > 0
+                          ? sub.skills.map(function(s) { return h('span', { key: s, className: 'chip' }, s); })
+                          : 'None'
+                      )
+                    ),
+                    h('div', { className: 'detail-row' },
+                      h('span', { className: 'detail-label' }, 'Plugins:'),
+                      h('span', { className: 'detail-value' },
+                        sub.plugins.length > 0
+                          ? sub.plugins.map(function(p) { return h('span', { key: p, className: 'chip' }, p); })
+                          : 'None'
+                      )
+                    ),
+                    h('div', { className: 'detail-row' },
+                      h('span', { className: 'detail-label' }, 'Guardrail:'),
+                      h('span', { className: 'detail-value guardrail-' + sub.guardrailStatus }, sub.guardrailStatus)
+                    ),
+                    h('button', { className: 'btn-small', onClick: function() { setEditingSub({ mid: mod.id, sid: sub.id }); } }, '\u270F\uFE0F Edit'),
+                    h('button', { className: 'btn-delete', onClick: function() { deleteSubFeature(mod.id, sub.id); } }, '\uD83D\uDDD1 Delete')
+                  )
+                );
+              }
+
+              subListChildren.push(
+                h('div', { key: sub.id, className: 'subfeature-card' },
+                  h('div', { className: 'subfeature-header', onClick: function() { toggleSub(sub.id); } },
+                    h('span', null,
+                      h('span', { className: 'subfeature-name' }, sub.name),
+                      h('span', { className: 'priority-badge priority-' + sub.priority }, sub.priority)
+                    ),
+                    h('span', { className: 'expand-icon' }, sOpen ? '\u25B2' : '\u25BC')
+                  ),
+                  subChildren
+                )
+              );
+            });
+
+            // Add Sub-feature button
+            subListChildren.push(
+              h('div', { key: 'add-sub', className: 'add-sub-btn' },
+                h('button', { className: 'btn-small', onClick: function() { addSubFeature(mod.id); } }, '+ Add Sub-feature')
+              )
             );
-          })}
 
-          <button className="fab" onClick={addModule}><span style={{fontSize:'20px'}}>+</span> Add Core Module</button>
-          {project.modules.length > 0 && <button className="fab-reset" onClick={resetAll}>🗑 Reset All</button>}
-          <EditModal />
-        </div>
-      );
-    };
+            modChildren.push(
+              h('div', { key: 'subfeatures', className: 'subfeature-list open' }, subListChildren)
+            );
+          }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+          children.push(
+            h('div', { key: mod.id, className: 'module-card' },
+              h('div', { className: 'module-header', onClick: function() { toggleModule(mod.id); } },
+                h('div', null,
+                  h('div', { className: 'module-title' }, mod.name),
+                  h('div', { className: 'module-subtitle' }, 'Type: ' + mod.type + ' \u2022 Status: ' + mod.status + ' \u2022 Sub-features: ' + mod.subFeatures.length)
+                ),
+                h('div', { style: { display: 'flex', alignItems: 'center', gap: '8px' } },
+                  h('button', { className: 'btn-delete', onClick: function(e) { e.stopPropagation(); deleteModule(mod.id); }, style: { marginTop: 0 } }, '\uD83D\uDDD1'),
+                  h('span', { className: 'expand-icon' }, isOpen ? '\u25B2' : '\u25BC')
+                )
+              ),
+              modChildren
+            )
+          );
+        });
+
+        // FAB buttons
+        children.push(
+          h('button', { key: 'fab', className: 'fab', onClick: addModule },
+            h('span', { style: { fontSize: '20px' } }, '+'),
+            ' Add Core Module'
+          )
+        );
+
+        if (project.modules.length > 0) {
+          children.push(
+            h('button', { key: 'fab-reset', className: 'fab-reset', onClick: resetAll }, '\uD83D\uDDD1 Reset All')
+          );
+        }
+
+        // Edit Modal
+        if (editingSub) {
+          children.push(
+            h(EditModal, {
+              key: 'modal',
+              editingSub: editingSub,
+              project: project,
+              onSave: updateSubFeature,
+              onClose: function() { setEditingSub(null); showToast('Sub-feature updated'); }
+            })
+          );
+        }
+
+        return h('div', { className: 'container' }, children);
+      }
+
+      // Mount
+      var rootElement = document.getElementById('root');
+      var root = ReactDOM.createRoot(rootElement);
+      root.render(h(App));
+    })();
   </script>
 </body>
 </html>
